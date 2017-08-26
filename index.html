@@ -7,13 +7,15 @@
   <title>Test for yandex nodejs</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <form action="#" id="myForm">
-    <input type="text" name="fio" required placeholder="fio">
-    <input type="email" name="email" required placeholder="email">
-    <input type="tel" name="phone" required placeholder="phone">
+  <!-- success.json / error.json / progress.json -->
+  <form action="./json/error.json" id="myForm">
+    <input type="text" name="fio" placeholder="fio" value="1 1 1">
+    <input type="text" name="email" placeholder="email" value="test@yandex.by">
+    <input type="text" name="phone" placeholder="phone" value="+7(111)222-33-11">
     <input id="submitButton" type="submit" value="submit">
   </form>
+  <div id="resultContainer"></div>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
   <script src="./index.js"></script>
 </body>
 </html>
