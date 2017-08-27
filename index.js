@@ -1,49 +1,53 @@
-var myForm = document.getElementById('myForm');
-var action = myForm.action
-var myInputs = myForm.getElementsByTagName('input')
-var submitButton = document.getElementById('submitButton');
-var resultContainer = document.getElementById('resultContainer');
+(function(){
 
 /* regexps */
-var regexps = {
-  fio: /^\w{1,}\s\w{1,}\s\w{1,}$/,
-  email: /^[a-z\._0-9]+@(ya|yandex)\.(ru|ua|by|kz|com)$/,
+const regexps = {
+  fio: /^[a-zA-Zа-яА-Я0-9_]{1,}\s[a-zA-Zа-яА-Я0-9_]{1,}\s[a-zA-Zа-яА-Я0-9_]{1,}$/,
+  email: /^[a-zA-Z\._0-9]+@(ya|yandex)\.(ru|ua|by|kz|com)$/,
   phone: /\+7\(\d{3}\)\d{3}-\d{2}-\d{2}$/,
   digit: /^[0-9]{1}$/
 }
-var namesFields = ['fio', 'email', 'phone'];
 /* /regexps */
 
+const namesFields = ['fio', 'email', 'phone'];
 
-/* functions */
+/* elements */
+const myForm = document.getElementById('myForm');
+const action = myForm.action
+const myInputs = myForm.getElementsByTagName('input')
+const submitButton = document.getElementById('submitButton');
+const resultContainer = document.getElementById('resultContainer');
+/* /elements */
+
+/* common functions */
 function validateInput (val, regexp) {
   return regexp.test(val)
 }
 
 function validInputSum (val, regexp, max) {
-  var string = val.toString().trim();
-  var array = string.split('');
-  var result = 0;
-  for (var i = 0; i < array.length; i++) {
-    var element = Number(array[i]);
+  const string = val.toString().trim();
+  const array = string.split('');
+  let result = 0;
+  for (let i = 0; i < array.length; i++) {
+    const element = Number(array[i]);
     if (regexp.test(element)) {
       result = result + element
     }
   }
-  if (result <= max) {
+  if (result < max) {
     return true;
   }
   return false;
 }
 
 function addAlertClass (form, arr) {
-  for (var i = 0; i < arr.length; i++) {
+  for (let i = 0; i < arr.length; i++) {
     form[arr[i]].classList.add("error");
   }
 }
 
 function removeAllAlertClasses (form) {
-  for (var i = 0; i < form.length; i++) {
+  for (let i = 0; i < form.length; i++) {
     form[i].classList.remove("error");
   }
 }
@@ -62,31 +66,28 @@ function resultError(el, text) {
   el.innerHTML = text;
 }
 
-function resultProgress(el, time) {
+function resultProgress(el, time, action) {
   el.classList.add('progress');
   setTimeout(function() {
-    sendRequest(action)
+    sendRequest(action, resultContainer)
   }, time)
 }
 
-function sendRequest(action) {
+function sendRequest(action, targetElement) {
   console.log('send...');
   $.getJSON(action, function(data) {
-    console.log(data);
     if (data.status == "success") {
-      resultSuccess(resultContainer, data.status);
+      resultSuccess(targetElement, data.status);
     } else if (data.status == "error") {
-      resultError(resultContainer, data.reason);
+      resultError(targetElement, data.reason);
     } else if (data.status == "progress") {
-      resultProgress(resultContainer, data.timeout)
+      resultProgress(targetElement, data.timeout, action)
     }
   });
 }
+/* /common functions */
 
-/* /functions */
-
-/* event listeners */
-
+/* events listeners */
 myForm.addEventListener('submit', function(e) {
   e.preventDefault();
   submit();
@@ -94,37 +95,37 @@ myForm.addEventListener('submit', function(e) {
 
 for (var index = 0; index < myInputs.length; index++) {
   myInputs[index].addEventListener('click', function(){
-    removeAllAlertClasses(myForm)
+    removeAllAlertClasses(myForm);
+  })
+  myInputs[index].addEventListener('input', function(){
+    removeAllAlertClasses(myForm);
   })
 }
+/* /events listeners */
 
-/* /event listeners */
-
-/* public methods */
-
+/* methods */
 function validate() {
-  const form = myForm
-
-  var result = {
+  const form = myForm;
+  let result = {
     isValid: false,
     errorFields: []
   };
 
   for (var i = 0; i < form.length; i++) {
     switch (form[i].name) {
-      case 'fio':
+      case namesFields[0]:
         const fioValid = validateInput(form[i].value, regexps.fio);
         if (!fioValid) {
           result.errorFields.push(form[i].name);
         }
         break;
-      case 'email':
+      case namesFields[1]:
         const emailValid = validateInput(form[i].value, regexps.email);
         if (!emailValid) {
           result.errorFields.push(form[i].name);
         }
         break;
-      case 'phone':
+      case namesFields[2]:
         const phoneValid = validateInput(form[i].value, regexps.phone);
         const phoneSumValid = validInputSum(form[i].value, regexps.digit, 30);
         if (!phoneValid || !phoneSumValid) {
@@ -147,14 +148,13 @@ function validate() {
 
 function getData () {
   const form = myForm;
-  var result = {}
+  let result = {}
   for (var i = 0; i < form.length; i++) {
     if (form[i].name == '') {
       continue;
     }
     result[form[i].name] = form[i].value
   }
-  console.log(result)
   return result;
 }
 
@@ -169,17 +169,21 @@ function setData(obj) {
 
 function submit() {
   const validateResult = validate();
-  
   if (validateResult.isValid) {
     disableSubmit(submitButton);
-    sendRequest(action);
+    sendRequest(action, resultContainer);
     return true;
   }
-
   return false;
 }
+/* /methods */
 
+/* public methods */
+window.validate = validate;
+window.getData = getData;
+window.setData = setData;
+window.submit = submit;
 /* /public methods */
 
-
+}());
 
